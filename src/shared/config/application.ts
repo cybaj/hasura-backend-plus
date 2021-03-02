@@ -33,7 +33,10 @@ export const {
   SMTP_HOST,
   SMTP_USER,
   SMTP_SENDER = SMTP_USER,
-  SMTP_AUTH_METHOD = 'PLAIN'
+  SMTP_AUTH_METHOD = 'PLAIN',
+  SMTP_SERVICE = '',
+  SMTP_API_KEY = '',
+  SMTP_DOMAIN = ''
 } = process.env
 export const EMAILS_ENABLE = castBooleanEnv('EMAILS_ENABLE')
 export const SMTP_PORT = castIntEnv('SMTP_PORT', 587)
