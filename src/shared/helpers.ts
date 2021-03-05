@@ -50,6 +50,7 @@ export const selectAccountByTicket = async (ticket: string): Promise<AccountData
 }
 
 // TODO await request returns undefined if no user found!
+// TODO there can be multiple accounts with the same userID now; this is broken!
 export const selectAccountByUserId = async (user_id: string | undefined): Promise<AccountData> => {
   if (!user_id) {
     throw Boom.badRequest('Invalid User Id.')

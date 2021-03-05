@@ -120,7 +120,7 @@ export const getJwkStore = (): JWKS.KeyStore => {
 /**
  * * Signs a payload with the existing JWT configuration
  */
-export const sign = (payload: object): string =>
+export const sign = (payload: Record<string, unknown>): string =>
   JWT.sign(payload, jwtKey, {
     algorithm: JWT_ALGORITHM,
     expiresIn: `${JWT_EXPIRES_IN}m`

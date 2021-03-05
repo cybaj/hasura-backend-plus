@@ -11,7 +11,7 @@ import {
   DEFAULT_USER_ROLE,
   DEFAULT_ALLOWED_USER_ROLES,
 } from '@shared/config'
-import { insertAccount, insertAccountProviderToUser, selectAccountProvider } from '@shared/queries'
+import { insertAccount, insertAccountProviderToUser, selectAccountProvider, updateProviderTokens } from '@shared/queries'
 import { selectAccountByEmail } from '@shared/helpers'
 import { request } from '@shared/request'
 import {
@@ -20,7 +20,8 @@ import {
   AccountData,
   UserData,
   RequestExtended,
-  InsertAccountProviderToUser
+  InsertAccountProviderToUser,
+  UpdateProviderTokens
 } from '@shared/types'
 import { setRefreshToken } from '@shared/cookies'
 
@@ -59,6 +60,14 @@ const manageProviderStrategy = (
 
   // IF user is already registered
   if (hasuraData.auth_account_providers.length > 0) {
+
+    const providerId = hasuraData.auth_account_providers[0].id;
+    await request<UpdateProviderTokens>(updateProviderTokens, {
+      account_provider_id: providerId,
+      provider_access_token: _accessToken,
+      provider_refresh_token: _refreshToken,
+    }).catch(err => done(err))
+
     return done(null, hasuraData.auth_account_providers[0].account)
   }
 
@@ -78,7 +87,9 @@ const manageProviderStrategy = (
         account_provider: {
           account_id: account.id,
           auth_provider: provider,
-          auth_provider_unique_id: id
+          auth_provider_unique_id: id,
+          provider_access_token: _accessToken,
+          provider_refresh_token: _refreshToken,
         },
         account_id: account.id
       }
@@ -104,7 +115,9 @@ const manageProviderStrategy = (
       data: [
         {
           auth_provider: provider,
-          auth_provider_unique_id: id
+          auth_provider_unique_id: id,
+          provider_access_token: _accessToken,
+          provider_refresh_token: _refreshToken,
         }
       ]
     }
