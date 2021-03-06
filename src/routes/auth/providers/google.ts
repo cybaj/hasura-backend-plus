@@ -18,6 +18,6 @@ export default (router: Router): void => {
 	'https://www.googleapis.com/auth/youtube.upload',
 	'https://www.googleapis.com/auth/youtube.readonly'
     ]
-    initProvider(router, 'google', Strategy, { scope: scopes, prompt: 'consent', access_type: 'offline' })
+    initProvider(router, 'google', Strategy, { scope: scopes, prompt: 'consent', accessType: 'offline' })
   }
 }

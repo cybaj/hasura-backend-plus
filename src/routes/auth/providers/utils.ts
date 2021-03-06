@@ -165,9 +165,9 @@ export const initProvider = <T extends Strategy>(
     callbackMethod = 'GET',
     ...options
   } = settings
+
   passport.use(
-    new strategy(
-      {
+    new strategy({
         ...PROVIDERS[strategyName],
         ...options,
         callbackURL: `${SERVER_URL}/auth/providers/${strategyName}/callback`,
@@ -179,7 +179,8 @@ export const initProvider = <T extends Strategy>(
 
   const subRouter = Router()
 
-  subRouter.get('/', passport.authenticate(strategyName, { session: false }))
+  // subRouter.get('/', passport.authenticate(strategyName, { session: false }))
+  subRouter.get('/', passport.authenticate(strategyName, options))
 
   const handlers = [
     passport.authenticate(strategyName, {
