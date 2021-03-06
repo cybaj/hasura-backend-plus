@@ -72,8 +72,10 @@ export default async (
       const server = app.listen(PORT, HOST, async () => {
         const { protocol, host } = url.parse(HASURA_ENDPOINT)
         const hasuraURL = `${protocol}//${host}`
+        console.log(`hasuraURL ${hasuraURL}`)
         // * Wait for GraphQL Engine to be ready
         await waitFor(`${hasuraURL}/healthz`)
+        console.log('healthz okay.')
         // * Empty or create the temporary directory
         await emptyDir(TEMP_MIGRATION_DIR)
         // * Set the Hasura CLI config.yaml file

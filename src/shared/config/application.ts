@@ -4,13 +4,13 @@ import { castIntEnv, castBooleanEnv } from './utils'
  * * Application Settings
  */
 export const {
-  SERVER_URL,
   REDIRECT_URL_ERROR,
   REDIRECT_URL_SUCCESS,
   HASURA_GRAPHQL_ADMIN_SECRET,
   HOST = ''
 } = process.env
-export const PORT = castIntEnv('PORT', 3000)
+export const SERVER_URL = process.env.SERVER_URL || "" as string
+export const PORT = castIntEnv('PORT', 8081)
 export const HASURA_ENDPOINT = process.env.HASURA_ENDPOINT as string
 
 const autoMigrateSettings = (envVal?: string): boolean | string => {

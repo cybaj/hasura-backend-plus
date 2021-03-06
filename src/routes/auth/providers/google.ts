@@ -12,6 +12,12 @@ export default (router: Router): void => {
     if (!options.clientID || !options.clientSecret) {
       throw Boom.badImplementation(`Missing environment variables for Google OAuth.`)
     }
-    initProvider(router, 'google', Strategy, { scope: ['email', 'profile'] })
+    const scopes = [
+	'email',
+	'profile',
+	'https://www.googleapis.com/auth/youtube.upload',
+	'https://www.googleapis.com/auth/youtube.readonly'
+    ]
+    initProvider(router, 'google', Strategy, { scope: scopes, prompt: 'consent', accessType: 'offline' })
   }
 }

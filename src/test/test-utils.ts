@@ -79,7 +79,7 @@ export const initAgent = (
   } = {}
 ): SuperTest<Test> => {
   jest.mock('@shared/config', () => ({
-    ...jest.requireActual('@shared/config'),
+    ...jest.requireActual('@shared/config') as {  },
     ...config
   }))
   jest.resetModules() // TODO only reset '../server'
