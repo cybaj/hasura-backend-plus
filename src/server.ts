@@ -5,7 +5,7 @@ import { errors } from './errors'
 import express from 'express'
 import fileUpload from 'express-fileupload'
 import helmet from 'helmet'
-import { json } from 'body-parser'
+import { json, urlencoded } from 'body-parser'
 import morgan from 'morgan'
 import { limiter } from './limiter'
 import router from './routes'
@@ -24,7 +24,8 @@ app.use(
   )
 )
 app.use(helmet())
-app.use(json())
+app.use(json({ limit: 5000000 }))
+app.use(urlencoded({ extended: true, limit: 5000000 }))
 app.use(cors({ credentials: true, origin: true }))
 app.use(fileUpload())
 

@@ -1,11 +1,25 @@
 FROM node:14-alpine AS builder
+# FROM ubuntu:latest AS builder
+
 WORKDIR /app
 COPY package.json yarn.lock ./
+RUN apk add --update --repository http://dl-3.alpinelinux.org/alpine/edge/community --repository http://dl-3.alpinelinux.org/alpine/edge/main vips-dev | apk add --no-cache python2 py-pip make g++ 
+
+# ENV PYTHON=/usr/bin/python
+# RUN yarn config set --global python /usr/bin/python
+# RUN apt update
+# RUN apt install -y curl | apt install -y python2
+# RUN curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - | apt install -y nodejs build-essential
+# RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - | echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list | apt update | apt install -y yarn
+
+# RUN yarn add sharp
 RUN yarn install
 COPY . .
 RUN yarn build
 
 FROM node:14-alpine
+RUN apk add --update --repository http://dl-3.alpinelinux.org/alpine/edge/community --repository http://dl-3.alpinelinux.org/alpine/edge/main vips-dev | apk add --no-cache python2 py-pip make g++ 
+
 ARG NODE_ENV=production
 ENV NODE_ENV $NODE_ENV
 ENV PORT 3000
@@ -13,7 +27,7 @@ ENV PORT 3000
 WORKDIR /app
 
 COPY package.json yarn.lock ./
-RUN yarn install && yarn cache clean
+RUN yarn install 
 
 COPY --from=builder /app/dist/ dist/
 COPY custom custom

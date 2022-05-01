@@ -29,7 +29,7 @@
     "@hapi/joi": "17.1.1",
     "@nicokaiser/passport-apple": "^0.2.1",
     "@types/nodemailer-mailgun-transport": "^1.4.2",
-    "@types/sharp": "^0.27.1",
+    "@types/sharp": "^0.29.0",
     "archiver": "4.0.1",
     "aws-sdk": "2.656.0",
     "bcryptjs": "^2.4.3",
@@ -70,7 +70,7 @@
     "passport-twitter": "^1.0.4",
     "passport-windowslive": "^1.0.2",
     "qrcode": "1.4.4",
-    "sharp": "^0.27.0",
+    "sharp": "^0.29.0",
     "temp-dir": "^2.0.0",
     "uuid": "7.0.3"
   },
