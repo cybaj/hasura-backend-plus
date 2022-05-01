@@ -5,7 +5,7 @@ import { errors } from './errors'
 import express from 'express'
 import fileUpload from 'express-fileupload'
 import helmet from 'helmet'
-import { json, urlencoded } from 'body-parser'
+import { json } from 'body-parser'
 import morgan from 'morgan'
 import { limiter } from './limiter'
 import router from './routes'
@@ -24,10 +24,11 @@ app.use(
   )
 )
 app.use(helmet())
-app.use(json({ limit: 5000000 }))
-app.use(urlencoded({ extended: true, limit: 5000000 }))
+app.use(json({ limit: '50mb', }))
+// app.use(urlencoded({ extended: true, limit: '50mb' }))
+app.use(fileUpload({ limits: {fieldSize: 50 * 1024 * 1024, fileSize: 50 * 1024 * 1024 }, abortOnLimit: true }))
 app.use(cors({ credentials: true, origin: true }))
-app.use(fileUpload())
+console.log(`도대체 왜 안 먹히냐`)
 
 if (AUTH_HAS_ONE_PROVIDER) {
   app.use(passport.initialize())
