@@ -5,7 +5,7 @@ import { errors } from './errors'
 import express from 'express'
 import fileUpload from 'express-fileupload'
 import helmet from 'helmet'
-import { json } from 'body-parser'
+import { json, urlencoded } from 'body-parser'
 import morgan from 'morgan'
 import { limiter } from './limiter'
 import router from './routes'
@@ -25,8 +25,8 @@ app.use(
 )
 app.use(helmet())
 app.use(json({ limit: '50mb', }))
-// app.use(urlencoded({ extended: true, limit: '50mb' }))
-app.use(fileUpload({ limits: {fieldSize: 50 * 1024 * 1024, fileSize: 50 * 1024 * 1024 }, abortOnLimit: true }))
+app.use(urlencoded({ extended: true, limit: '50mb' }))
+app.use(fileUpload({ limits: {fieldNameSize: 200, fieldSize: 50 * 1024 * 1024, fileSize: 50 * 1024 * 1024 }, abortOnLimit: true }))
 app.use(cors({ credentials: true, origin: true }))
 console.log(`도대체 왜 안 먹히냐`)
 
