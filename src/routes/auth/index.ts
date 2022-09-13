@@ -10,6 +10,7 @@ import nocache from 'nocache'
 import changeEmail from './change-email'
 import getJwks from './jwks'
 import loginAccount from './login'
+import loginNameAccount from './login-name'
 import logout from './logout'
 import mfa from './mfa'
 import changePassword from './change-password'
@@ -47,6 +48,7 @@ if (ALLOW_USER_SELF_DELETE) {
 if (AUTH_LOCAL_USERS_ENABLE) {
   router
     .post('/login', loginAccount)
+    .post('/login-name', loginNameAccount)
     .post('/logout', logout)
     .post('/register', registerAccount)
     .post('/register-activate', listAccount)

@@ -53,6 +53,7 @@ async function refreshToken({ refresh_token }: RequestExtended, res: Response): 
   const jwt_expires_in = newJwtExpiry
   const user: UserData = {
     id: account.user.id,
+    name: account.user.name,
     display_name: account.user.display_name,
     email: account.email,
     avatar_url: account.user.avatar_url

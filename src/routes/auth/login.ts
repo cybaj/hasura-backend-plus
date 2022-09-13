@@ -100,6 +100,7 @@ async function loginAccount({ body }: Request, res: Response): Promise<unknown> 
   const user: UserData = {
     id: account.user.id,
     display_name: account.user.display_name,
+    name: account.user.name,
     email: account.email,
     avatar_url: account.user.avatar_url
   }

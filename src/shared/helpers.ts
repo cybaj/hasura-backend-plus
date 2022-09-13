@@ -4,7 +4,9 @@ import {
   rotateTicket as rotateTicketQuery,
   selectAccountByEmail as selectAccountByEmailQuery,
   selectAccountByTicket as selectAccountByTicketQuery,
-  selectAccountByUserId as selectAccountByUserIdQuery
+  selectAccountByUserId as selectAccountByUserIdQuery,
+  selectAccountByUserName as selectAccountByUserNameQuery,
+  selectUserByName as selectUserByNameQuery,
 } from './queries'
 
 import Boom from '@hapi/boom'
@@ -13,7 +15,7 @@ import bcrypt from 'bcryptjs'
 import { pwnedPassword } from 'hibp'
 import { request } from './request'
 import { v4 as uuidv4 } from 'uuid'
-import { AccountData, QueryAccountData, PermissionVariables, RequestExtended } from './types'
+import { AccountData, QueryAccountData, QueryUserData, PermissionVariables, RequestExtended, UserData } from './types'
 
 /**
  * Create QR code.
@@ -35,6 +37,18 @@ export function asyncWrapper(fn: any) {
   return function (req: RequestExtended, res: Response, next: NextFunction): void {
     fn(req, res, next).catch(next)
   }
+}
+
+export const selectUserByName = async (name: string): Promise<UserData> => {
+  const hasuraData = await request<QueryUserData>(selectUserByNameQuery, { name })
+  if (!hasuraData.users[0]) throw Boom.badRequest('User does not exist.')
+  return hasuraData.users[0]
+}
+
+export const selectAccountByUserName = async (name: string): Promise<AccountData> => {
+  const hasuraData = await request<QueryAccountData>(selectAccountByUserNameQuery, { name })
+  if (!hasuraData.auth_accounts[0]) throw Boom.badRequest('Account does not exist.')
+  return hasuraData.auth_accounts[0]
 }
 
 export const selectAccountByEmail = async (email: string): Promise<AccountData> => {
@@ -71,6 +85,26 @@ export const selectAccount = async (httpBody: {
   const { email, ticket } = httpBody
   try {
     return await selectAccountByEmail(email)
+  } catch {
+    try {
+      return await selectAccountByTicket(ticket)
+    } catch {
+      return undefined
+    }
+  }
+}
+
+/**
+ * Looks for an account in the database, first by email, second by ticket
+ * @param httpBody
+ * @return account data, null if account is not found
+ */
+export const selectAccount2 = async (httpBody: {
+  [key: string]: string
+}): Promise<AccountData | undefined> => {
+  const { name, ticket } = httpBody
+  try {
+    return await selectAccountByUserName(name)
   } catch {
     try {
       return await selectAccountByTicket(ticket)

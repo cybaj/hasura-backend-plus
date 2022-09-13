@@ -1,44 +1,42 @@
 import { Request, Response } from 'express'
-import { asyncWrapper, rotateTicket, selectAccount } from '@shared/helpers'
+import Boom from '@hapi/boom'
+import bcrypt from 'bcryptjs'
+import { asyncWrapper, selectAccount2 } from '@shared/helpers'
 import { newJwtExpiry, createHasuraJwt } from '@shared/jwt'
 import { setRefreshToken } from '@shared/cookies'
 import { UserData, Session } from '@shared/types'
 
-import Boom from '@hapi/boom'
-import { authenticator } from 'otplib'
-import { totpSchema } from '@shared/validation'
-
-async function totpLogin({ body }: Request, res: Response): Promise<void> {
-  const { ticket, code } = await totpSchema.validateAsync(body)
-  const account = await selectAccount(body)
-
+async function loginNameAccount({ body }: Request, res: Response): Promise<unknown> {
   // default to true
   const useCookie = typeof body.cookie !== 'undefined' ? body.cookie : true
 
+  // else, login users normally
+  const { password } = body
+
+  const account = await selectAccount2(body)
+
   if (!account) {
-    throw Boom.unauthorized('Invalid or expired ticket.')
+    throw Boom.badRequest('Account does not exist.')
   }
 
-  const { id, otp_secret, mfa_enabled, active } = account
-
-  if (!mfa_enabled) {
-    throw Boom.badRequest('MFA is not enabled.')
-  }
+  const { id, mfa_enabled, password_hash, active, ticket } = account
 
   if (!active) {
     throw Boom.badRequest('Account is not activated.')
   }
 
-  if (!otp_secret) {
-    throw Boom.badRequest('OTP secret is not set.')
+  if (!(await bcrypt.compare(password, password_hash))) {
+    throw Boom.unauthorized('Username and password do not match')
   }
 
-  if (!authenticator.check(code, otp_secret)) {
-    throw Boom.unauthorized('Invalid two-factor code.')
+  if (mfa_enabled) {
+    return res.send({ mfa: true, ticket })
   }
 
+  // refresh_token
   const refresh_token = await setRefreshToken(res, id, useCookie)
-  await rotateTicket(ticket)
+
+  // generate JWT
   const jwt_token = createHasuraJwt(account)
   const jwt_expires_in = newJwtExpiry
   const user: UserData = {
@@ -48,11 +46,10 @@ async function totpLogin({ body }: Request, res: Response): Promise<void> {
     email: account.email,
     avatar_url: account.user.avatar_url
   }
-
   const session: Session = { jwt_token, jwt_expires_in, user }
-
   if (!useCookie) session.refresh_token = refresh_token
+
   res.send(session)
 }
 
-export default asyncWrapper(totpLogin)
+export default asyncWrapper(loginNameAccount)

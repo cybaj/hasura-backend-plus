@@ -8,6 +8,7 @@ import { UserData } from '@shared/types'
 const transformProfile = ({ id, name, email, photos }: Profile): UserData => ({
   id,
   email,
+  name: name ? `${name.firstName} ${name.lastName}` : email,
   display_name: name ? `${name.firstName} ${name.lastName}` : email,
   avatar_url: photos?.[0].value
 })

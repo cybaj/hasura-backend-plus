@@ -86,6 +86,7 @@ async function registerAccount({ body }: Request, res: Response): Promise<unknow
   const account = accounts.insert_auth_accounts.returning[0]
   const user: UserData = {
     id: account.user.id,
+    name: account.user.name,
     display_name: account.user.display_name,
     email: account.email,
     avatar_url: account.user.avatar_url

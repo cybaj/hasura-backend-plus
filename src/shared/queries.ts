@@ -12,6 +12,7 @@ const accountFragment = gql`
     user {
       id
       display_name
+      name
       ${JWT_CUSTOM_FIELDS.join('\n\t\t\t')}
     }
     is_anonymous
@@ -111,6 +112,23 @@ export const selectAccountByEmail = gql`
     }
   }
   ${accountFragment}
+`
+
+export const selectAccountByUserName = gql`
+  query($name: String!) {
+    auth_accounts(where: { user: { name: { _eq: $name } } }) {
+      ...accountFragment
+    }
+  }
+  ${accountFragment}
+`
+
+export const selectUserByName = gql`
+  query($name: String!) {
+    users(where: { name: { _eq: $name } }) {
+      id
+    }
+  }
 `
 
 export const selectAccountByTicket = gql`

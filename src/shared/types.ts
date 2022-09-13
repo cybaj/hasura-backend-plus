@@ -53,6 +53,7 @@ export interface UserData {
   [key: string]: ClaimValueType
   id: string
   email?: string
+  name: string
   display_name: string
   avatar_url?: string
 }
@@ -74,6 +75,10 @@ export interface AccountData {
 
 export interface QueryAccountData {
   auth_accounts: AccountData[]
+}
+
+export type QueryUserData = {
+  users: UserData[]
 }
 
 export interface UpdateAccountData {
