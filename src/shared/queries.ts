@@ -36,6 +36,20 @@ export const insertAccount = gql`
   ${accountFragment}
 `
 
+/*
+export const insertTUser = gql`
+  mutation($account: auth_accounts_insert_input!) {
+    insert_auth_accounts(objects: [$account]) {
+      affected_rows
+      returning {
+        ...accountFragment
+      }
+    }
+  }
+  ${accountFragment}
+`
+*/
+
 export const insertAccountProviderToUser = gql`
   mutation($account_provider: auth_account_providers_insert_input!, $account_id: uuid!) {
     insert_auth_account_providers_one(object: $account_provider) {

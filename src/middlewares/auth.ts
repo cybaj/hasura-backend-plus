@@ -44,11 +44,11 @@ export function authMiddleware(req: RequestExtended, res: Response, next: NextFu
   // -------------------------------------
   // COOKIES
   // -------------------------------------
-  console.log(`req.headers@middleware`, JSON.stringify(req.headers, null, 2))
-  console.log(`req.cookies@middleware`, JSON.stringify(req.cookies, null, 2))
-  console.log(`req.signedCookies@middleware`, JSON.stringify(req.signedCookies, null, 2))
+  console.debug(`req.headers@middleware`, JSON.stringify(req.headers, null, 2))
+  console.debug(`req.cookies@middleware`, JSON.stringify(req.cookies, null, 2))
+  console.debug(`req.signedCookies@middleware`, JSON.stringify(req.signedCookies, null, 2))
   const cookiesInUse = COOKIE_SECRET ? req.signedCookies : req.cookies
-  console.log(`cookiesInUse@middleware`, JSON.stringify(cookiesInUse, null, 2))
+  console.debug(`cookiesInUse@middleware`, JSON.stringify(cookiesInUse, null, 2))
 
   if ('refresh_token' in cookiesInUse) {
     refresh_token = {

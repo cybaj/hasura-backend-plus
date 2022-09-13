@@ -18,6 +18,7 @@ import registerAccount from './register'
 import token from './token'
 import activateAccount from './activate'
 import deleteAccount from './delete'
+import listAccount from './list'
 
 const router = Router()
 
@@ -48,6 +49,7 @@ if (AUTH_LOCAL_USERS_ENABLE) {
     .post('/login', loginAccount)
     .post('/logout', logout)
     .post('/register', registerAccount)
+    .post('/register-activate', listAccount)
     .use('/change-password', changePassword)
 }
 

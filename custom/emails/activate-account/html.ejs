@@ -13,18 +13,18 @@
         margin: 0.5em 1em;
         border-radius: 3px;
         padding: 0.25em 1em;
-        background: palevioletred;
-        border: 2px solid palevioletred;
+        background: green;
+        border: 2px solid white;
       }
     </style>
   </head>
 
   <body>
-    <h2>Hello <%= display_name %></h2>
-    <p>Please confirm your email address by clicking the button below:</p>
+    <h2>환영해요! <%= display_name %></h2>
+    <p>아래 버튼을 클릭해서 인증을 완료해주세요:</p>
     <a href="<%= url %>/auth/activate?ticket=<%= ticket %>">
-      <button>Confirm email address</button></a
+      <button>확인하기</button></a
     >
-    <p>Thanks,<br />The Team</p>
+    <p>감사해요,<br />루아드맵 팀</p>
   </body>
 </html>
