@@ -91,6 +91,13 @@ interface AccountProvider {
   account: AccountData
 }
 
+export interface InsertTUserData {
+  insert_treasure_user_one: {
+    name: string
+    id: number
+  }
+}
+
 export interface QueryAccountProviderData {
   auth_account_providers: AccountProvider[]
 }

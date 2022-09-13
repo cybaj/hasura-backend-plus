@@ -10,18 +10,18 @@ import { asyncWrapper, checkHibp, hashPassword } from '@shared/helpers'
 import { newJwtExpiry, createHasuraJwt } from '@shared/jwt'
 
 import Boom from '@hapi/boom'
-import { insertAccount, activateAccount } from '@shared/queries'
+import { insertAccount, activateAccount, insertTUser } from '@shared/queries'
 import { setRefreshToken } from '@shared/cookies'
 /*
 import { registerSchema } from '@shared/validation'
 */
 import { request } from '@shared/request'
 import { v4 as uuidv4 } from 'uuid'
-import { InsertAccountData, UpdateAccountData, UserData, Session } from '@shared/types'
+import { InsertAccountData, UpdateAccountData, UserData, Session, InsertTUserData } from '@shared/types'
 import {} from '@shared/types'
 
 async function listAccount({ body }: Request, res: Response): Promise<unknown> {
-  let hasuraData: UpdateAccountData
+  let hasuraData: UpdateAccountData | InsertTUserData
   const useCookie = typeof body.cookie !== 'undefined' ? body.cookie : true
 
   /*
@@ -117,9 +117,9 @@ async function listAccount({ body }: Request, res: Response): Promise<unknown> {
     }
     throw err
   }
-  const { affected_rows } = hasuraData.update_auth_accounts
+  const { affected_rows : update_affected_rows} = hasuraData.update_auth_accounts
 
-  if (!affected_rows) {
+  if (!update_affected_rows) {
     console.error('Invalid or expired ticket')
 
     if (REDIRECT_URL_ERROR) {
@@ -127,6 +127,29 @@ async function listAccount({ body }: Request, res: Response): Promise<unknown> {
     }
     /* istanbul ignore next */
     throw Boom.unauthorized('Invalid or expired ticket.')
+  }
+
+  try {
+    hasuraData = await request<InsertTUserData>(insertTUser, {
+      name,
+    })
+  } catch (err) /* istanbul ignore next */ {
+    console.error(err)
+    if (REDIRECT_URL_ERROR) {
+      return res.redirect(302, REDIRECT_URL_ERROR as string)
+    }
+    throw err
+  }
+  const { name : inserted_name } = hasuraData.insert_treasure_user_one
+
+  if (!inserted_name) {
+    console.error('Error occurs when TUser inserts.')
+
+    if (REDIRECT_URL_ERROR) {
+      return res.redirect(302, REDIRECT_URL_ERROR as string)
+    }
+    /* istanbul ignore next */
+    throw Boom.unauthorized('Error occurs when TUser inserts.')
   }
 
   const refresh_token = await setRefreshToken(res, account.id, useCookie)

@@ -36,19 +36,17 @@ export const insertAccount = gql`
   ${accountFragment}
 `
 
-/*
 export const insertTUser = gql`
-  mutation($account: auth_accounts_insert_input!) {
-    insert_auth_accounts(objects: [$account]) {
-      affected_rows
-      returning {
-        ...accountFragment
-      }
+  mutation($name: String!, $email: String) {
+    insert_treasure_user_one(
+      object: { name: $name, email: $email }
+      on_conflict: { constraint: treasure_user_pkey, update_columns: last_seen }
+    ) {
+      name
+      id
     }
   }
-  ${accountFragment}
 `
-*/
 
 export const insertAccountProviderToUser = gql`
   mutation($account_provider: auth_account_providers_insert_input!, $account_id: uuid!) {

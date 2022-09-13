@@ -5,7 +5,8 @@ import {
   DEFAULT_USER_ROLE,
   DEFAULT_ALLOWED_USER_ROLES,
   ALLOWED_USER_ROLES,
-  VERIFY_EMAILS
+  VERIFY_EMAILS,
+  REDIRECT_URL_ERROR,
 } from '@shared/config'
 import { Request, Response } from 'express'
 import { asyncWrapper, checkHibp, hashPassword, selectAccount } from '@shared/helpers'
@@ -13,14 +14,15 @@ import { newJwtExpiry, createHasuraJwt } from '@shared/jwt'
 
 import Boom from '@hapi/boom'
 import { emailClient } from '@shared/email'
-import { insertAccount } from '@shared/queries'
+import { insertAccount, insertTUser } from '@shared/queries'
 import { setRefreshToken } from '@shared/cookies'
 import { registerSchema } from '@shared/validation'
 import { request } from '@shared/request'
 import { v4 as uuidv4 } from 'uuid'
-import { InsertAccountData, UserData, Session } from '@shared/types'
+import { InsertAccountData, InsertTUserData, UserData, Session } from '@shared/types'
 
 async function registerAccount({ body }: Request, res: Response): Promise<unknown> {
+  let hasuraData: InsertTUserData
   const useCookie = typeof body.cookie !== 'undefined' ? body.cookie : true
 
   const {
@@ -122,6 +124,30 @@ async function registerAccount({ body }: Request, res: Response): Promise<unknow
 
     let session: Session = { jwt_token: null, jwt_expires_in: null, user }
     return res.send(session)
+  }
+
+  try {
+    hasuraData = await request<InsertTUserData>(insertTUser, {
+      name,
+      email,
+    })
+  } catch (err) /* istanbul ignore next */ {
+    console.error(err)
+    if (REDIRECT_URL_ERROR) {
+      return res.redirect(302, REDIRECT_URL_ERROR as string)
+    }
+    throw err
+  }
+  const { name : inserted_name } = hasuraData.insert_treasure_user_one
+
+  if (!inserted_name) {
+    console.error('Error occurs when TUser inserts.')
+
+    if (REDIRECT_URL_ERROR) {
+      return res.redirect(302, REDIRECT_URL_ERROR as string)
+    }
+    /* istanbul ignore next */
+    throw Boom.unauthorized('Error occurs when TUser inserts.')
   }
 
   const refresh_token = await setRefreshToken(res, account.id, useCookie)
