@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import Boom from '@hapi/boom'
 import bcrypt from 'bcryptjs'
 import { asyncWrapper, selectAccount2 } from '@shared/helpers'
-import { createHasuraJwt } from '@shared/jwt'
+import { createHasuraJwt, newJwtExpiry } from '@shared/jwt'
 import { setRefreshToken } from '@shared/cookies'
 import { UserData, Session } from '@shared/types'
 
@@ -38,9 +38,7 @@ async function loginNameAccount({ body }: Request, res: Response): Promise<unkno
 
   // generate JWT
   const jwt_token = createHasuraJwt(account)
-  // biff temporary 30일 유효
-  const jwt_expires_in_biff = 30 * 24 * 60 * 60 * 1000
-  const jwt_expires_in = jwt_expires_in_biff // newJwtExpiry
+  const jwt_expires_in = newJwtExpiry // active 3 Hours
   const user: UserData = {
     id: account.user.id,
     display_name: account.user.display_name,

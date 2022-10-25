@@ -11,6 +11,7 @@ import { SetNewEmailData } from '@shared/types'
 
 import { getRequestInfo } from './utils'
 import { RequestExtended } from '@shared/types'
+import {newJwtExpiry} from '@shared/jwt'
 
 async function requestChangeEmail(req: RequestExtended, res: Response): Promise<unknown> {
   const { user_id, new_email } = await getRequestInfo(req)
@@ -24,8 +25,7 @@ async function requestChangeEmail(req: RequestExtended, res: Response): Promise<
   const ticket = uuidv4()
   const now = new Date()
   const ticket_expires_at = new Date()
-  // ticket active for 60 minutes
-  ticket_expires_at.setTime(now.getTime() + 60 * 60 * 1000)
+  ticket_expires_at.setTime(now.getTime() + newJwtExpiry) 
   // set new ticket
   try {
     await request(setNewTicket, {

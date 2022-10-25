@@ -52,7 +52,7 @@ async function listAccount({ body }: Request, res: Response): Promise<unknown> {
   const ticket = uuidv4()
   const now = new Date()
   const ticket_expires_at = new Date()
-  ticket_expires_at.setTime(now.getTime() + 60 * 60 * 1000 * 24 * 30) // active for 1 month
+  ticket_expires_at.setTime(now.getTime() + newJwtExpiry) // active for 3 Hours
   const password_hash = await hashPassword(password)
 
   const defaultRole = register_options.default_role ?? DEFAULT_USER_ROLE

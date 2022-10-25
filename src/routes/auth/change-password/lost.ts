@@ -8,6 +8,7 @@ import { emailClient } from '@shared/email'
 import { forgotSchema } from '@shared/validation'
 import { setNewTicket } from '@shared/queries'
 import { request } from '@shared/request'
+import {newJwtExpiry} from '@shared/jwt'
 
 /**
  * * Creates a new temporary ticket in the account, and optionnaly send the link by email
@@ -38,8 +39,7 @@ async function requestChangePassword({ body }: Request, res: Response): Promise<
   const now = new Date()
   const ticket_expires_at = new Date()
 
-  // ticket active for 60 minutes
-  ticket_expires_at.setTime(now.getTime() + 60 * 60 * 1000)
+  ticket_expires_at.setTime(now.getTime() + newJwtExpiry) 
 
   // set new ticket
   try {

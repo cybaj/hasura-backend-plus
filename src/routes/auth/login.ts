@@ -3,7 +3,7 @@ import Boom from '@hapi/boom'
 import bcrypt from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
 import { asyncWrapper, selectAccount } from '@shared/helpers'
-import { createHasuraJwt } from '@shared/jwt'
+import { createHasuraJwt, newJwtExpiry } from '@shared/jwt'
 import { setRefreshToken } from '@shared/cookies'
 import { loginAnonymouslySchema, loginSchema } from '@shared/validation'
 import { insertAccount } from '@shared/queries'
@@ -59,8 +59,7 @@ async function loginAccount({ body }: Request, res: Response): Promise<unknown> 
       const refresh_token = await setRefreshToken(res, account.id, useCookie)
 
       const jwt_token = createHasuraJwt(account)
-      const jwt_expires_in_biff = 30 * 24 * 60 * 60 * 1000
-      const jwt_expires_in = jwt_expires_in_biff // newJwtExpiry
+      const jwt_expires_in = newJwtExpiry
 
       const session: Session = { jwt_token, jwt_expires_in, user: account.user }
       if (useCookie) session.refresh_token = refresh_token
@@ -97,8 +96,7 @@ async function loginAccount({ body }: Request, res: Response): Promise<unknown> 
 
   // generate JWT
   const jwt_token = createHasuraJwt(account)
-  const jwt_expires_in_biff = 30 * 24 * 60 * 60 * 1000
-  const jwt_expires_in = jwt_expires_in_biff // newJwtExpiry
+  const jwt_expires_in = newJwtExpiry
   const user: UserData = {
     id: account.user.id,
     display_name: account.user.display_name,

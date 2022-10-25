@@ -41,7 +41,7 @@ async function registerAccount({ body }: Request, res: Response): Promise<unknow
   const ticket = uuidv4()
   const now = new Date()
   const ticket_expires_at = new Date()
-  ticket_expires_at.setTime(now.getTime() + 60 * 60 * 1000) // active for 60 minutes
+  ticket_expires_at.setTime(now.getTime() + newJwtExpiry) 
   const password_hash = await hashPassword(password)
 
   const defaultRole = register_options.default_role ?? DEFAULT_USER_ROLE
