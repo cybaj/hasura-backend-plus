@@ -11,6 +11,7 @@ export const {
 } = process.env
 export const SERVER_URL = process.env.SERVER_URL || "" as string
 export const PORT = castIntEnv('PORT', 3000)
+export const INITIAL_RP = castIntEnv('INITIAL_RP', 600)
 export const HASURA_ENDPOINT = process.env.HASURA_ENDPOINT as string
 
 const autoMigrateSettings = (envVal?: string): boolean | string => {

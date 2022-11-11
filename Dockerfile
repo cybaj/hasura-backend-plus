@@ -3,7 +3,7 @@ FROM node:14-alpine3.14 AS builder
 
 WORKDIR /app
 COPY package.json yarn.lock ./
-RUN apk add --update --repository http://dl-cdn.alpinelinux.org/alpine/edge/community --repository http://dl-cdn.alpinelinux.org/alpine/edge/main vips-dev 
+RUN apk add --update --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/main vips-dev 
 RUN apk add --no-cache python2 py-pip make g++
 # RUN apt update
 # RUN apt install -y python2 make g++ nodejs npm
@@ -16,13 +16,12 @@ RUN apk add --no-cache python2 py-pip make g++
 # RUN curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - | apt install -y nodejs build-essential
 # RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - | echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list | apt update | apt install -y yarn
 
-# RUN yarn add sharp
 RUN yarn install
 COPY . .
 RUN yarn build
 
 FROM node:14-alpine3.14
-RUN apk add --update --repository http://dl-cdn.alpinelinux.org/alpine/edge/community --repository http://dl-cdn.alpinelinux.org/alpine/edge/main vips-dev 
+RUN apk add --update --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/main vips-dev 
 RUN apk add --no-cache python2 py-pip make g++ tzdata
 RUN echo "Asia/Seoul" > /etc/timezone
 

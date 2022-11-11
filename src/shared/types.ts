@@ -55,6 +55,7 @@ export interface UserData {
   email?: string
   name: string
   display_name: string
+  phone_number?: string
   avatar_url?: string
 }
 
@@ -102,6 +103,14 @@ export interface InsertTUserData {
     id: number
   }
 }
+
+export interface InsertCurrencyData {
+  insert_currency_one: {
+    hash: string
+    updated_at: string
+  }
+}
+
 
 export interface QueryAccountProviderData {
   auth_account_providers: AccountProvider[]

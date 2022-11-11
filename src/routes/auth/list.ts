@@ -4,24 +4,32 @@ import {
   DEFAULT_ALLOWED_USER_ROLES,
   ALLOWED_USER_ROLES,
   REDIRECT_URL_ERROR,
+  INITIAL_RP
 } from '@shared/config'
 import { Request, Response } from 'express'
 import { asyncWrapper, checkHibp, hashPassword } from '@shared/helpers'
 import { newJwtExpiry, createHasuraJwt } from '@shared/jwt'
 
 import Boom from '@hapi/boom'
-import { insertAccount, activateAccount, insertTUser } from '@shared/queries'
+import { insertAccount, activateAccount, insertTUser, insertCurrency } from '@shared/queries'
 import { setRefreshToken } from '@shared/cookies'
 /*
 import { registerSchema } from '@shared/validation'
 */
 import { request } from '@shared/request'
 import { v4 as uuidv4 } from 'uuid'
-import { InsertAccountData, UpdateAccountData, UserData, Session, InsertTUserData } from '@shared/types'
+import {
+  InsertCurrencyData,
+  InsertAccountData,
+  UpdateAccountData,
+  UserData,
+  Session,
+  InsertTUserData
+} from '@shared/types'
 import {} from '@shared/types'
 
 async function listAccount({ body }: Request, res: Response): Promise<unknown> {
-  let hasuraData: UpdateAccountData | InsertTUserData
+  let hasuraData: UpdateAccountData | InsertTUserData | InsertCurrencyData
   const useCookie = typeof body.cookie !== 'undefined' ? body.cookie : true
 
   /*
@@ -39,6 +47,7 @@ async function listAccount({ body }: Request, res: Response): Promise<unknown> {
     user_data = {},
     register_options = {},
     email = null,
+    phone_number = null
   } = body
 
   /*
@@ -84,7 +93,7 @@ async function listAccount({ body }: Request, res: Response): Promise<unknown> {
           data: accountRoles
         },
         user: {
-          data: { email: email, name: name, display_name: name, ...user_data }
+          data: { email, name, phone_number, display_name: name, ...user_data }
         }
       }
     })
@@ -118,7 +127,7 @@ async function listAccount({ body }: Request, res: Response): Promise<unknown> {
     }
     throw err
   }
-  const { affected_rows : update_affected_rows} = hasuraData.update_auth_accounts
+  const { affected_rows: update_affected_rows } = hasuraData.update_auth_accounts
 
   if (!update_affected_rows) {
     console.error('Invalid or expired ticket')
@@ -132,7 +141,7 @@ async function listAccount({ body }: Request, res: Response): Promise<unknown> {
 
   try {
     hasuraData = await request<InsertTUserData>(insertTUser, {
-      name,
+      name
     })
   } catch (err) /* istanbul ignore next */ {
     console.error(err)
@@ -141,7 +150,7 @@ async function listAccount({ body }: Request, res: Response): Promise<unknown> {
     }
     throw err
   }
-  const { name : inserted_name } = hasuraData.insert_treasure_user_one
+  const { name: inserted_name, id: TUId } = hasuraData.insert_treasure_user_one
 
   if (!inserted_name) {
     console.error('Error occurs when TUser inserts.')
@@ -153,12 +162,37 @@ async function listAccount({ body }: Request, res: Response): Promise<unknown> {
     throw Boom.unauthorized('Error occurs when TUser inserts.')
   }
 
+  try {
+    hasuraData = await request<InsertCurrencyData>(insertCurrency, {
+      TUId,
+      rp: INITIAL_RP
+    })
+  } catch (err) /* istanbul ignore next */ {
+    console.error(err)
+    if (REDIRECT_URL_ERROR) {
+      return res.redirect(302, REDIRECT_URL_ERROR as string)
+    }
+    throw err
+  }
+  const { hash } = hasuraData.insert_currency_one
+
+  if (!hash) {
+    console.error('Error occurs when Currency inserts.')
+
+    if (REDIRECT_URL_ERROR) {
+      return res.redirect(302, REDIRECT_URL_ERROR as string)
+    }
+    /* istanbul ignore next */
+    throw Boom.unauthorized('Error occurs when Currency inserts.')
+  }
+
   const refresh_token = await setRefreshToken(res, account.id, useCookie)
 
   // generate JWT
   const jwt_token = createHasuraJwt(account)
   const jwt_expires_in = newJwtExpiry
 
+  // eslint-disable-next-line
   let session: Session = { jwt_token, jwt_expires_in, user }
   if (!useCookie) session.refresh_token = refresh_token
 

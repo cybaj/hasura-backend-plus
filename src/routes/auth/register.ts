@@ -7,6 +7,7 @@ import {
   ALLOWED_USER_ROLES,
   VERIFY_EMAILS,
   REDIRECT_URL_ERROR,
+  INITIAL_RP
 } from '@shared/config'
 import { Request, Response } from 'express'
 import { asyncWrapper, checkHibp, hashPassword, selectAccount } from '@shared/helpers'
@@ -14,15 +15,16 @@ import { newJwtExpiry, createHasuraJwt } from '@shared/jwt'
 
 import Boom from '@hapi/boom'
 import { emailClient } from '@shared/email'
-import { insertAccount, insertTUser } from '@shared/queries'
+import { insertAccount, insertTUser, insertCurrency } from '@shared/queries'
 import { setRefreshToken } from '@shared/cookies'
 import { registerSchema } from '@shared/validation'
 import { request } from '@shared/request'
 import { v4 as uuidv4 } from 'uuid'
-import { InsertAccountData, InsertTUserData, UserData, Session } from '@shared/types'
+import { InsertCurrencyData, InsertAccountData, InsertTUserData, UserData, Session } from '@shared/types'
 
 async function registerAccount({ body }: Request, res: Response): Promise<unknown> {
   let hasuraData: InsertTUserData
+  let currencyData: InsertCurrencyData
   const useCookie = typeof body.cookie !== 'undefined' ? body.cookie : true
 
   const {
@@ -123,6 +125,7 @@ async function registerAccount({ body }: Request, res: Response): Promise<unknow
       throw Boom.badImplementation()
     }
 
+    // eslint-disable-next-line
     let session: Session = { jwt_token: null, jwt_expires_in: null, user }
     return res.send(session)
   }
@@ -139,7 +142,7 @@ async function registerAccount({ body }: Request, res: Response): Promise<unknow
     }
     throw err
   }
-  const { name : inserted_name } = hasuraData.insert_treasure_user_one
+  const { id: TUId, name : inserted_name } = hasuraData.insert_treasure_user_one
 
   if (!inserted_name) {
     console.error('Error occurs when TUser inserts.')
@@ -151,12 +154,38 @@ async function registerAccount({ body }: Request, res: Response): Promise<unknow
     throw Boom.unauthorized('Error occurs when TUser inserts.')
   }
 
+  try {
+    currencyData = await request<InsertCurrencyData>(insertCurrency, {
+      TUId,
+      rp: INITIAL_RP,
+    })
+  } catch (err) /* istanbul ignore next */ {
+    console.error(err)
+    if (REDIRECT_URL_ERROR) {
+      return res.redirect(302, REDIRECT_URL_ERROR as string)
+    }
+    throw err
+  }
+  const { hash } = currencyData.insert_currency_one
+
+  if (!hash) {
+    console.error('Error occurs when TUser inserts.')
+
+    if (REDIRECT_URL_ERROR) {
+      return res.redirect(302, REDIRECT_URL_ERROR as string)
+    }
+    /* istanbul ignore next */
+    throw Boom.unauthorized('Error occurs when Currency inserts.')
+  }
+
+
   const refresh_token = await setRefreshToken(res, account.id, useCookie)
 
   // generate JWT
   const jwt_token = createHasuraJwt(account)
   const jwt_expires_in = newJwtExpiry
   
+  // eslint-disable-next-line
   let session: Session = { jwt_token, jwt_expires_in, user }
   if (!useCookie) session.refresh_token = refresh_token
 

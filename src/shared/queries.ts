@@ -1,6 +1,15 @@
 import { JWT_CUSTOM_FIELDS } from './config'
 import gql from 'graphql-tag'
 
+export const insertCurrency = gql`
+  mutation($TUId: Int!, $rp: Int!) {
+    insert_currency_one(object: { owner_id: $TUId, rp: $rp }) {
+      hash
+      updated_at
+    }
+  }
+`
+
 const accountFragment = gql`
   fragment accountFragment on auth_accounts {
     id
@@ -13,6 +22,8 @@ const accountFragment = gql`
       id
       display_name
       name
+      phone_number
+      avatar_url
       ${JWT_CUSTOM_FIELDS.join('\n\t\t\t')}
     }
     is_anonymous
@@ -319,12 +330,16 @@ export const selectAccountProvider = gql`
   ${accountFragment}
 `
 export const updateProviderTokens = gql`
-  mutation ($account_provider_id: uuid!, $provider_access_token: String!, $provider_refresh_token: String) {
+  mutation(
+    $account_provider_id: uuid!
+    $provider_access_token: String!
+    $provider_refresh_token: String
+  ) {
     update_auth_account_providers_by_pk(
-      pk_columns: {id: $account_provider_id},
+      pk_columns: { id: $account_provider_id }
       _set: {
-        provider_access_token: $provider_access_token,
-        provider_refresh_token: $provider_refresh_token,
+        provider_access_token: $provider_access_token
+        provider_refresh_token: $provider_refresh_token
       }
     ) {
       updated_at

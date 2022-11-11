@@ -102,7 +102,8 @@ async function loginAccount({ body }: Request, res: Response): Promise<unknown> 
     display_name: account.user.display_name,
     name: account.user.name,
     email: account.email,
-    avatar_url: account.user.avatar_url
+    avatar_url: account.user.avatar_url,
+    phone_number: account.user.phone_number,
   }
   const session: Session = { jwt_token, jwt_expires_in, user }
   if (!useCookie) session.refresh_token = refresh_token

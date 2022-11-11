@@ -44,6 +44,7 @@ async function loginNameAccount({ body }: Request, res: Response): Promise<unkno
     display_name: account.user.display_name,
     name: account.user.name,
     email: account.email,
+    phone_number: account.user.phone_number,
     avatar_url: account.user.avatar_url
   }
   const session: Session = { jwt_token, jwt_expires_in, user }
